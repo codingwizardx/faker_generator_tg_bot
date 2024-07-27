@@ -1,6 +1,6 @@
 import logging
-
 from colorama import init
+import os
 
 init(autoreset=True)
 
@@ -16,15 +16,20 @@ console_handler.setLevel(logging.INFO)
 console_handler.setFormatter(logging.Formatter(log_format))
 logger.addHandler(console_handler)
 
-
-def get_user_logger(user_id: int) -> logging.Logger:
+def setup_logger(user_id: int):
+    log_directory = "logs"
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
+    log_file_path = f"{log_directory}/user_{user_id}.log"
+    file_handler = logging.FileHandler(log_file_path, mode='a')
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(logging.Formatter(log_format))
+    
     user_logger = logging.getLogger(f"user_{user_id}")
     if not user_logger.handlers:
-        # File handler for user-specific logs
-        file_handler = logging.FileHandler(f"logs/user_{user_id}.log")
-        file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(logging.Formatter(log_format))
         user_logger.addHandler(file_handler)
-
     user_logger.propagate = False  # Prevent double logging
-    return user_logger
+
+
+def get_user_logger(user_id: int) -> logging.Logger:
+    return logging.getLogger(f"user_{user_id}")
