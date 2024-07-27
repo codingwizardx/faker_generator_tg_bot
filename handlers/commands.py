@@ -1,6 +1,11 @@
 from mimesis.enums import Locale
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+)
 
 from config.settings import API_HASH, API_ID, BOT_TOKEN
 from logs.logger import get_user_logger, logger
@@ -77,6 +82,87 @@ async def generate_command(client: Client, message: Message):
     logger.info(
         f"Displayed country selection for {message.from_user.username} (ID: {message.from_user.id})"
     )
+
+
+@app.on_callback_query(filters.regex(r"^generate_"))
+async def generate_callback(client: Client, callback_query: CallbackQuery):
+    try:
+        locale_value = callback_query.data.split("_")[1]
+        locale = Locale(locale_value)
+        user_states[callback_query.from_user.id] = locale_value
+
+        # Logging for debugging
+        logger.info(f"Generating details for locale: {locale_value}")
+        user_logger = get_user_logger(callback_query.from_user.id)
+        user_logger.info(f"Generating details for locale: {locale_value}")
+
+        details = await generate_details(locale)
+
+        response = f"<b>Personal Profile: {details['Full Name']}</b>\n\n"
+        for key, value in details.items():
+            icon = (
+                "👤"
+                if key == "Full Name"
+                else "🎂"
+                if key == "Age"
+                else "📅"
+                if key == "Birth Date"
+                else "⚧️"
+                if key == "Sex"
+                else "🏛️"
+                if key == "University"
+                else "🏠"
+                if key == "Street Name"
+                else "🏙️"
+                if key == "City"
+                else "🇺🇸"
+                if key == "State"
+                else "🌎"
+                if key == "Country"
+                else "📮"
+                if key == "Postal Code"
+                else "🏢"
+                if key == "Company"
+                else "📞"
+                if key == "Phone Number"
+                else "💼"
+                if key == "Occupation"
+                else "🌍"
+                if key == "Nationality"
+                else "🗣️"
+                if key == "Language"
+                else "🖥️"
+                if key == "Username"
+                else "🔐"
+                if key == "Password"
+                else "⚖️"
+                if key == "Weight"
+                else "📏"
+                if key == "Height"
+                else ""
+            )
+            response += f"{icon} <b>{key}:</b> `{value}`\n"
+
+        await save_details_to_db(
+            callback_query.from_user.id, callback_query.from_user.username, details
+        )
+
+        user_logger.info(
+            f"Displayed generated details for {callback_query.from_user.username} ({callback_query.from_user.id})"
+        )
+
+        # Answer the callback query
+        await callback_query.answer()
+        await callback_query.message.edit_text(response)
+        logger.info(
+            f"Displayed generated details for {callback_query.from_user.username} (ID: {callback_query.from_user.id})"
+        )
+    except Exception as e:
+        logger.error(f"Error in generate_callback: {e}")
+        user_logger.error(f"Error in generate_callback: {e}")
+        await callback_query.answer(
+            "An error occurred. Please try again.", show_alert=True
+        )
 
 
 @app.on_message(filters.command("regenerate"))
@@ -170,73 +256,55 @@ async def history_command(client: Client, message: Message):
         await message.reply_text("No history found.")
         return
 
-    if len(message.command) > 1:
-        response = f"<b>Last {limit} generated details:</b>\n\n"
-        for entry in history:
-            response += f"<b>Generated on:</b> {entry['timestamp']}\n"
-            for key, value in entry["details"].items():
-                icon = (
-                    "👤"
-                    if key == "Full Name"
-                    else "🎂"
-                    if key == "Age"
-                    else "📅"
-                    if key == "Birth Date"
-                    else "⚧️"
-                    if key == "Sex"
-                    else "🏛️"
-                    if key == "University"
-                    else "🏠"
-                    if key == "Street Name"
-                    else "🏙️"
-                    if key == "City"
-                    else "🇺🇸"
-                    if key == "State"
-                    else "🌎"
-                    if key == "Country"
-                    else "📮"
-                    if key == "Postal Code"
-                    else "🏢"
-                    if key == "Company"
-                    else "📞"
-                    if key == "Phone Number"
-                    else "💼"
-                    if key == "Occupation"
-                    else "🌍"
-                    if key == "Nationality"
-                    else "🗣️"
-                    if key == "Language"
-                    else "🖥️"
-                    if key == "Username"
-                    else "🔐"
-                    if key == "Password"
-                    else "⚖️"
-                    if key == "Weight"
-                    else "📏"
-                    if key == "Height"
-                    else ""
-                )
-                response += f"{icon} <b>{key}:</b> {value}\n"
-            response += "\n"
+    response = f"<b>Last {limit} generated details:</b>\n\n"
+    for entry in history:
+        response += f"<b>Generated on:</b> {entry['timestamp']}\n"
+        for key, value in entry["details"].items():
+            icon = (
+                "👤"
+                if key == "Full Name"
+                else "🎂"
+                if key == "Age"
+                else "📅"
+                if key == "Birth Date"
+                else "⚧️"
+                if key == "Sex"
+                else "🏛️"
+                if key == "University"
+                else "🏠"
+                if key == "Street Name"
+                else "🏙️"
+                if key == "City"
+                else "🇺🇸"
+                if key == "State"
+                else "🌎"
+                if key == "Country"
+                else "📮"
+                if key == "Postal Code"
+                else "🏢"
+                if key == "Company"
+                else "📞"
+                if key == "Phone Number"
+                else "💼"
+                if key == "Occupation"
+                else "🌍"
+                if key == "Nationality"
+                else "🗣️"
+                if key == "Language"
+                else "🖥️"
+                if key == "Username"
+                else "🔐"
+                if key == "Password"
+                else "⚖️"
+                if key == "Weight"
+                else "📏"
+                if key == "Height"
+                else ""
+            )
+            response += f"{icon} <b>{key}:</b> {value}\n"
+        response += "\n"
 
-        await message.reply_text(response)
-    else:
-        html_content = "<html><body><h1>Fake Details History</h1>"
-        for entry in history:
-            html_content += f"<h2>Generated on: {entry['timestamp']}</h2>"
-            html_content += "<ul>"
-            for key, value in entry["details"].items():
-                html_content += f"<li><strong>{key}:</strong> {value}</li>"
-            html_content += "</ul>"
-        html_content += "</body></html>"
-
-        with open("history.html", "w", encoding="utf-8") as f:
-            f.write(html_content)
-
-        await message.reply_document(
-            "history.html", caption="Your fake details history"
-        )
-
+    await message.reply_text(response)
     logger.info(
         f"Displayed history for {message.from_user.username} (ID: {message.from_user.id})"
     )
