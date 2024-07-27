@@ -1,6 +1,6 @@
 # Fake Details Generator Telegram BOT
 
-![Bot Icon](bot_utils\fake_icon.png)
+![Bot Icon](https://github.com/codingwizardx/faker_generator_tg_bot/raw/master/bot_utils/fake_icon.png)
 
 Welcome to the Fake Details Generator Telegram Bot! This bot helps you generate fake details for various countries in a colorful and organized format.
 
@@ -43,12 +43,12 @@ You can test the bot by interacting with it on Telegram:
 
 ## Screenshots
 
-![Generate Command Screenshot](bot_utils\bot_screenshot.png)
-![Regenerate Command Screenshot](bot_utils\regenerate_bot.png)
+![Generate Command Screenshot](https://github.com/codingwizardx/faker_generator_tg_bot/raw/master/bot_utils/bot_screenshot.png)
+
+![Regenerate Command Screenshot](https://github.com/codingwizardx/faker_generator_tg_bot/raw/master/bot_utils/regenerate_bot.png)
 
 ---
 
 Feel free to explore the bot and provide your feedback!
 
 ---
-
