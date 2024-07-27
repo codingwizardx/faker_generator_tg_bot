@@ -1,0 +1,6 @@
+.venv/
+.env
+fake_details_bot.session
+history.html
+main.ipynb
+/*.log
